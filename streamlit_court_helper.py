@@ -7,7 +7,7 @@ import easyocr
 
 @st.cache_resource()
 def easyocr_recognition(img):
-    return easyocr.Reader(["ru", "en"]).readtext(img, detail=0, paragraph=True, text_threshold=0.8)
+    return easyocr.Reader(["ru", "en", "uk"]).readtext(img, detail=0, paragraph=True, text_threshold=0.8)
 
 
 # распознавание с помощью easyocr, параметры: отключена детализация вывода,
