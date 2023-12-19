@@ -24,6 +24,9 @@ border-radius: 10px;
 [data-testid="stHeader"]{
   background-color: rgba(0,0,0,0);
 }
+[id="tabs-bui3-tab-0"]{
+  padding: 5px;
+}
 </style>
 """
 
