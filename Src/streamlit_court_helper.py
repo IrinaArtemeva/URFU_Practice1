@@ -27,6 +27,9 @@ border-radius: 10px;
 [id="tabs-bui3-tab-0"]{
   padding: 5px;
 }
+[data-testid="block-container"]
+ { background-color: rgba(255, 255, 255, 0.7)
+}
 </style>
 """
 
