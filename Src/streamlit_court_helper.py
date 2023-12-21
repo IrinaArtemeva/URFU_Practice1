@@ -28,7 +28,7 @@ border-radius: 10px;
   padding: 5px;
 }
 [data-testid="block-container"]
- { background-color: rgba(255, 255, 255, 0.7)
+ { background-color: rgba(255, 255, 255, 0.4)
 }
 </style>
 """
