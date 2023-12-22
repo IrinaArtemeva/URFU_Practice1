@@ -290,7 +290,7 @@ with tabs[1]:
 
 
 
-    keywords = st.text_input(('Input your keywords.\n').lower())
+    keywords = st.text_input(('Введите ключевые слова.\n').lower())
     result1 = st.button('Вывести список релевантных статей')
     if result1:
         try:
