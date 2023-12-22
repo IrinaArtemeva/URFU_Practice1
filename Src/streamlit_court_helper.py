@@ -260,7 +260,10 @@ with tabs[1]:
                                 string[pl] = str(chr(int(val, 16)))
                         return ''.join(string)
 
+
                     st.write("Название статьи:" + ' ' + (special_char_fix(i["name"])) + ' ' + 'Аннотация:' + ' ' + i["annotation"] + ' ' + i["link"], end='\n')
+
+
                 found = int(response_found[:response_found.find(',')])
 
             except requests.HTTPError or AttributeError as e:
@@ -286,10 +289,15 @@ with tabs[1]:
 
 
 
-#if __name__ == '__main__':
+
     keywords = st.text_input(('Input your keywords.\n').lower())
-    pr = Searcher()
-    pr.search_articles(keywords, 10)
+    result1 = st.button('Вывести список релевантных статей')
+    if result1:
+        try:
+            pr = Searcher()
+            pr.search_articles(keywords, 10)
+        except:
+            st.write('вы не начали поиск!')
 
     #st.write('Раздел в разработке!')
     #st.image('http://www.opsa.info/img/innovations/v-nastoyaschee-vremya-razdel-nahoditsya-v-razrabotke.jpg')
