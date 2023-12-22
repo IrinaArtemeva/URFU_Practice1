@@ -270,7 +270,7 @@ with tabs[1]:
 
 
                     st.write("Название статьи:" + ' ' + (special_char_fix(i["name"])) + ' ' + 'Аннотация:' + ' ' + i["annotation"] + ' ' + i["link"], end='\n')
-                
+
 
                 found = int(response_found[:response_found.find(',')])
 
