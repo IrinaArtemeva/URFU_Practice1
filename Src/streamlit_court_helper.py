@@ -270,7 +270,7 @@ with tabs[1]:
 
 
                     st.write("Название статьи:" + ' ' + (special_char_fix(i["name"])) + ' ' + 'Аннотация:' + ' ' + i["annotation"] + ' ' + i["link"], end='\n')
-
+                
 
                 found = int(response_found[:response_found.find(',')])
 
@@ -411,113 +411,115 @@ with tabs[2]:
     extractor = KeyphraseExtractionPipeline(model=model_name)
 
 
-    file_path = st.file_uploader(
-                label='Выберите изображение, содержащее текст, для распознавания.\n Формат загружаемого файла .txt, .pdf')
+    file_path = st.text_input('Выберите файл статьи для распознавания.\n Формат загружаемого файла .txt, .pdf')
 
-    indent = '.pdf'
+    result2 = st.button('Вывести список ключевых слов')
+    if result2:
 
-    pdf_path = file_path
+        indent = '.pdf'
+        if indent in file_path:
+            pdf_path = file_path
 
-    # создаём объект файла PDF
-    pdfFileObj = open(pdf_path, 'rb')
-    # создаём объект считывателя PDF
-    pdfReaded = PyPDF2.PdfReader(pdfFileObj)
+            # создаём объект файла PDF
+            pdfFileObj = open(pdf_path, 'rb')
+            # создаём объект считывателя PDF
+            pdfReaded = PyPDF2.PdfReader(pdfFileObj)
 
-    # Создаём словарь для извлечения текста из каждого изображения
-    text_per_page = {}
-    # Извлекаем страницы из PDF
-    for pagenum, page in enumerate(extract_pages(pdf_path)):
+            # Создаём словарь для извлечения текста из каждого изображения
+            text_per_page = {}
+            # Извлекаем страницы из PDF
+            for pagenum, page in enumerate(extract_pages(pdf_path)):
 
-        # Инициализируем переменные, необходимые для извлечения текста со страницы
-        pageObj = pdfReaded.pages[pagenum]
-        page_text = []
-        line_format = []
-        text_from_images = []
-        text_from_tables = []
-        page_content = []
-        # Инициализируем количество исследованных таблиц
-        table_num = 0
-        first_element = True
-        table_extraction_flag = False
-        # Открываем файл pdf
-        pdf = pdfplumber.open(pdf_path)
-        # Находим исследуемую страницу
-        page_tables = pdf.pages[pagenum]
-        # Находим количество таблиц на странице
-        tables = page_tables.find_tables()
+                # Инициализируем переменные, необходимые для извлечения текста со страницы
+                pageObj = pdfReaded.pages[pagenum]
+                page_text = []
+                line_format = []
+                text_from_images = []
+                text_from_tables = []
+                page_content = []
+                # Инициализируем количество исследованных таблиц
+                table_num = 0
+                first_element = True
+                table_extraction_flag = False
+                # Открываем файл pdf
+                pdf = pdfplumber.open(pdf_path)
+                # Находим исследуемую страницу
+                page_tables = pdf.pages[pagenum]
+                # Находим количество таблиц на странице
+                tables = page_tables.find_tables()
 
-        # Находим все элементы
-        page_elements = [(element.y1, element) for element in page._objs]
-        # Сортируем все элементы по порядку нахождения на странице
-        page_elements.sort(key=lambda a: a[0], reverse=True)
+                # Находим все элементы
+                page_elements = [(element.y1, element) for element in page._objs]
+                # Сортируем все элементы по порядку нахождения на странице
+                page_elements.sort(key=lambda a: a[0], reverse=True)
 
-        # Находим элементы, составляющие страницу
-        for i, component in enumerate(page_elements):
-            # Извлекаем положение верхнего края элемента в PDF
-            pos = component[0]
-            # Извлекаем элемент структуры страницы
-            element = component[1]
+                # Находим элементы, составляющие страницу
+                for i, component in enumerate(page_elements):
+                    # Извлекаем положение верхнего края элемента в PDF
+                    pos = component[0]
+                    # Извлекаем элемент структуры страницы
+                    element = component[1]
 
-            # Проверяем, является ли элемент текстовым
-            if isinstance(element, LTTextContainer):
-                # Проверяем, находится ли текст в таблице
-                if table_extraction_flag == False:
-                    # Используем функцию извлечения текста и формата для каждого текстового элемента
-                    (line_text, format_per_line) = text_extraction(element)
-                    # Добавляем текст каждой строки к тексту страницы
-                    page_text.append(line_text)
-                    # Добавляем формат каждой строки, содержащей текст
-                    line_format.append(format_per_line)
-                    page_content.append(line_text)
-                else:
-                    # Пропускаем текст, находящийся в таблице
-                    pass
+                    # Проверяем, является ли элемент текстовым
+                    if isinstance(element, LTTextContainer):
+                        # Проверяем, находится ли текст в таблице
+                        if table_extraction_flag == False:
+                            # Используем функцию извлечения текста и формата для каждого текстового элемента
+                            (line_text, format_per_line) = text_extraction(element)
+                            # Добавляем текст каждой строки к тексту страницы
+                            page_text.append(line_text)
+                            # Добавляем формат каждой строки, содержащей текст
+                            line_format.append(format_per_line)
+                            page_content.append(line_text)
+                        else:
+                            # Пропускаем текст, находящийся в таблице
+                            pass
 
-            # Проверяем элементы на наличие таблиц
-            if isinstance(element, LTRect):
-                # Если первый прямоугольный элемент
-                if first_element == True and (table_num + 1) <= len(tables):
-                    # Находим ограничивающий прямоугольник таблицы
-                    lower_side = page.bbox[3] - tables[table_num].bbox[3]
-                    upper_side = element.y1
-                    # Извлекаем информацию из таблицы
-                    table = extract_table(pdf_path, pagenum, table_num)
-                    # Преобразуем информацию таблицы в формат структурированной строки
-                    table_string = table_converter(table)
-                    # Добавляем строку таблицы в список
-                    text_from_tables.append(table_string)
-                    page_content.append(table_string)
-                    # Устанавливаем флаг True, чтобы избежать повторения содержимого
-                    table_extraction_flag = True
-                    # Преобразуем в другой элемент
-                    first_element = False
-                    # Добавляем условное обозначение в списки текста и формата
-                    page_text.append('table')
-                    line_format.append('table')
+                    # Проверяем элементы на наличие таблиц
+                    if isinstance(element, LTRect):
+                        # Если первый прямоугольный элемент
+                        if first_element == True and (table_num + 1) <= len(tables):
+                            # Находим ограничивающий прямоугольник таблицы
+                            lower_side = page.bbox[3] - tables[table_num].bbox[3]
+                            upper_side = element.y1
+                            # Извлекаем информацию из таблицы
+                            table = extract_table(pdf_path, pagenum, table_num)
+                            # Преобразуем информацию таблицы в формат структурированной строки
+                            table_string = table_converter(table)
+                            # Добавляем строку таблицы в список
+                            text_from_tables.append(table_string)
+                            page_content.append(table_string)
+                            # Устанавливаем флаг True, чтобы избежать повторения содержимого
+                            table_extraction_flag = True
+                            # Преобразуем в другой элемент
+                            first_element = False
+                            # Добавляем условное обозначение в списки текста и формата
+                            page_text.append('table')
+                            line_format.append('table')
 
-                # Проверяем, извлекли ли мы уже таблицы из этой страницы
-                if element.y0 >= lower_side and element.y1 <= upper_side:
-                    pass
-                elif not isinstance(page_elements[i + 1][1], LTRect):
-                    table_extraction_flag = False
-                    first_element = True
-                    table_num += 1
+                        # Проверяем, извлекли ли мы уже таблицы из этой страницы
+                        if element.y0 >= lower_side and element.y1 <= upper_side:
+                            pass
+                        elif not isinstance(page_elements[i + 1][1], LTRect):
+                            table_extraction_flag = False
+                            first_element = True
+                            table_num += 1
 
-        # Создаём ключ для словаря
-        dctkey = 'Page_' + str(pagenum)
-        # Добавляем список списков как значение ключа страницы
-        text_per_page[dctkey] = [page_text, line_format, text_from_images, text_from_tables, page_content]
+                # Создаём ключ для словаря
+                dctkey = 'Page_' + str(pagenum)
+                # Добавляем список списков как значение ключа страницы
+                text_per_page[dctkey] = [page_text, line_format, text_from_images, text_from_tables, page_content]
 
-    # Закрываем объект файла pdf
-    pdfFileObj.close()
+            # Закрываем объект файла pdf
+            pdfFileObj.close()
 
-    # Удаляем содержимое страницы
-    result = ''.join(text_per_page['Page_0'][4])
-    print(result)
-    text = result.replace("\n", " ")
-    keyphrases = extractor(text)
-    print(keyphrases)
-    else:
-        text = filereader(file_path).replace("\n", " ")
-        keyphrases = extractor(text)
-        print(keyphrases)
+            # Удаляем содержимое страницы
+            result = ''.join(text_per_page['Page_0'][4])
+            st.write(result)
+            text = result.replace("\n", " ")
+            keyphrases = extractor(text)
+            st.write(keyphrases)
+        else:
+            text = filereader(file_path).replace("\n", " ")
+            keyphrases = extractor(text)
+            st.write(keyphrases)

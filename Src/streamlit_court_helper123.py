@@ -11,6 +11,7 @@ from transformers import (
 )
 from transformers.pipelines import AggregationStrategy
 import numpy as np
+import pandas as pd
 import PyPDF2
 
 
@@ -269,8 +270,9 @@ with tabs[1]:
                         return ''.join(string)
 
 
-                    st.write("Название статьи:" + ' ' + (special_char_fix(i["name"])) + ' ' + 'Аннотация:' + ' ' + i["annotation"] + ' ' + i["link"], end='\n')
-
+                    data = {"Название статьи": (special_char_fix(i["name"])), "Аннотация": i["annotation"], "Ссылка": i["link"]}
+                    df = pd.DataFrame(data)
+                    st.write(df)
 
                 found = int(response_found[:response_found.find(',')])
 
